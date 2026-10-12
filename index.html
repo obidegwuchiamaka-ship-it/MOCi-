@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday Gabriel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Archivo+Black&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- Supabase JS Client Library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#050b1f;--blue:#1747d6;--glass:rgba(255,255,255,.07);--line:rgba(120,160,255,.25);--serif:'Cormorant Garamond',Georgia,serif;--block:'Archivo Black',Impact,sans-serif}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--navy);color:#fff;font:400 16px/1.5 Inter,system-ui,sans-serif;overflow-x:hidden}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #8fb0ff;outline-offset:2px}
+#bg{position:fixed;inset:-20px;background:radial-gradient(circle at 50% 30%,#16357f,#050b1f 70%) center/cover;transition:filter 1.6s ease;filter:blur(2px) brightness(.6);z-index:0}
+body.w #bg{filter:blur(22px) brightness(.4)}
+body:not([data-v=home]) #bg{filter:blur(14px) brightness(.22)}
+#buddy{position:fixed;left:50%;bottom:0;height:40vh;max-height:420px;transform:translateX(-50%);z-index:0;transition:filter 1.6s;filter:drop-shadow(0 0 40px rgba(60,120,255,.55));pointer-events:none}
+body.w #buddy{filter:blur(18px)}
+body:not([data-v=home]) #buddy,body.hasphoto #buddy{display:none}
+#welcome{position:fixed;inset:0;z-index:50;display:grid;place-items:center;font:italic 600 clamp(56px,16vw,120px)/1 var(--serif);transition:opacity 1s;pointer-events:none}
+body:not(.w) #welcome{opacity:0}
+header{position:fixed;top:0;left:0;right:0;height:calc(56px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#123bb8,#1d56f0);box-shadow:0 4px 24px rgba(23,71,214,.45);z-index:30}
+header span{flex:1;font-weight:600}
+.ib{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:22px}
+.ib:active{background:rgba(255,255,255,.18)}
+#burger{display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:center}
+#burger i{display:block;width:22px;height:2.5px;background:#fff;border-radius:2px}
+#minion{position:fixed;right:10px;top:calc(46px + env(safe-area-inset-top));z-index:31;width:30px;transform-origin:50% 0;animation:sway 3.2s ease-in-out infinite;pointer-events:none}
+@keyframes sway{50%{transform:rotate(7deg)}}
+.view{display:none;position:relative;z-index:1;min-height:100%;padding:calc(76px + env(safe-area-inset-top)) 18px 120px;max-width:760px;margin:auto}
+.view.on{display:block}
+#home.on{display:grid;place-items:center;text-align:center;min-height:100vh;padding-bottom:40px}
+#home h1{font:italic 600 clamp(38px,10vw,72px)/1.1 var(--serif);text-shadow:0 2px 24px #000}
+#home p{margin-top:18px;font:italic 500 clamp(20px,5vw,30px)/1.3 var(--serif);text-shadow:0 2px 16px #000}
+#home>div{opacity:0;transform:translateY(14px);transition:opacity 1.2s .5s,transform 1.2s .5s}
+body:not(.w) #home>div{opacity:1;transform:none}
+h2.t{font:600 22px Inter;margin-bottom:16px}
+.row{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:12px;margin-bottom:10px;background:var(--glass);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(10px)}
+.row:active{background:rgba(255,255,255,.14)}
+.av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#2f6bff,#1a3fb0);font-weight:600}
+.row span{display:flex;flex-direction:column;min-width:0}
+.row small{color:#b9c8ee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{color:#b9c8ee;text-align:center;padding:40px 10px}
+.fab{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);width:62px;height:62px;border-radius:50%;background:#0f5bff;font-size:34px;line-height:1;box-shadow:0 0 28px rgba(40,110,255,.7);z-index:20;display:none}
+body[data-v=msgs] .fab,body[data-v=mems] .fab{display:block}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.tile{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:#0b1636;border:1px solid var(--line)}
+.tile img,.tile video{width:100%;height:100%;object-fit:cover;display:block}
+.tile b{position:absolute;inset:0;display:grid;place-items:center;font-size:26px;text-shadow:0 0 12px #000;background:rgba(0,0,0,.18)}
+#viewer.on{display:flex;flex-direction:column;padding-bottom:24px;max-width:none}
+#vtop{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+#vtop div{flex:1;min-width:0}#vtop strong{display:block}#vtop small{color:#b9c8ee}
+#vbody{flex:1;display:grid;place-items:center;min-height:0;position:relative}
+#vbody img,#vbody video{max-width:100%;max-height:72vh;border-radius:14px;box-shadow:0 10px 50px #000}
+#vbody video{width:100%;background:#000}
+.card{width:100%;max-width:560px;padding:28px 24px;border-radius:22px;background:linear-gradient(160deg,rgba(40,80,200,.35),rgba(255,255,255,.06));border:1px solid var(--line);backdrop-filter:blur(12px)}
+.card h2{font:italic 600 34px var(--serif);margin-bottom:12px}
+.card p{font:italic 500 23px/1.45 var(--serif);white-space:pre-wrap;overflow-wrap:anywhere}
+#nav{display:flex;justify-content:space-between;margin-top:12px}
+#nav button{width:48px;height:48px;border-radius:50%;background:var(--glass);border:1px solid var(--line);font-size:24px}
+#scrim,#modal{position:fixed;inset:0;z-index:40;background:rgba(2,6,20,.65);opacity:0;pointer-events:none;transition:opacity .3s}
+#scrim.on,#modal.on{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(86vw,340px);z-index:41;padding:calc(76px + env(safe-area-inset-top)) 18px 18px;background:linear-gradient(180deg,#0a1a52,#050b1f);border-left:1px solid var(--line);transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+#drawer.on{transform:none}
+#drawer button{display:block;width:100%;text-align:left;margin-bottom:12px;padding:20px 18px;border-radius:16px;font:20px var(--block);background:var(--glass);border:1px solid var(--line)}
+#drawer button.hot{background:#0f5bff;box-shadow:0 0 24px rgba(40,110,255,.55)}
+#modal{display:grid;place-items:center;padding:16px;z-index:60}
+.sheet{position:relative;width:100%;max-width:400px;max-height:92vh;overflow:auto;padding:22px;border-radius:22px;background:rgba(10,20,55,.92);border:1px solid var(--line);box-shadow:0 0 60px rgba(40,100,255,.3);text-align:center;transform:scale(.94);transition:transform .3s}
+#modal.on .sheet{transform:none}
+.sheet h3{font-size:20px;margin-bottom:6px}
+.sub{color:#b9c8ee;margin-bottom:16px}
+.x{position:absolute;top:8px;right:12px;font-size:28px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.opt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 8px;border-radius:16px;font-size:30px;border:1px solid var(--line)}
+.opt span{font-size:15px}
+.opt.v{background:#2b2a8c}.opt.i{background:#0c6a5a}.opt.t{background:#7a4a10}
+label{display:block;text-align:left;font-size:14px;color:#b9c8ee;margin:10px 0 4px}
+input[type=text],textarea{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-size:16px}
+textarea{min-height:120px;resize:vertical}
+.pri{width:100%;margin-top:16px;padding:14px;border-radius:14px;background:#0f5bff;font-weight:600}
+.ghost{margin-top:10px;padding:8px;color:#b9c8ee}
+.big{font-size:48px;margin-bottom:8px}
+.sheet img,.sheet video{max-width:100%;max-height:260px;border-radius:12px;margin:10px 0}
+.send{display:flex;align-items:center;gap:12px;margin-top:6px}
+.pg{flex:1;text-align:left}.pg div{height:10px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}
+.pg i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2f6bff,#8fb0ff);transition:width .2s}
+.pg small{color:#b9c8ee}
+.go{width:52px;height:52px;border-radius:50%;background:#0f5bff;font-size:26px}.go:disabled{opacity:.35}
+.ok{width:76px;height:76px;margin:6px auto 12px;border-radius:50%;display:grid;place-items:center;font-size:42px;background:#12a56a;box-shadow:0 0 30px rgba(18,165,106,.6)}
+.shake{animation:sh .3s}@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#bye{position:fixed;inset:0;z-index:70;display:none;place-items:center;text-align:center;padding:24px;background:var(--navy)}
+#bye.on{display:grid}#bye h2{font:italic 600 40px var(--serif);margin-bottom:8px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+<svg id="buddy" viewBox="0 0 200 300" aria-hidden="true"><path d="M100 4 70 42h60z" fill="#e8344e"/><path d="M100 4 88 42h12z" fill="#fff" opacity=".85"/><circle cx="100" cy="4" r="6" fill="#fff"/><rect x="40" y="38" width="120" height="228" rx="60" fill="#f7d02c"/><path d="M40 190h120v14a60 60 0 0 1-60 62 60 60 0 0 1-60-62z" fill="#2b5fb8"/><rect x="70" y="170" width="60" height="34" rx="6" fill="#244f9c"/><path d="M40 112h120" stroke="#222" stroke-width="16"/><circle cx="76" cy="112" r="27" fill="#d9d9d9" stroke="#8a8a8a" stroke-width="7"/><circle cx="124" cy="112" r="27" fill="#d9d9d9" stroke="#8a8a8a" stroke-width="7"/><circle cx="76" cy="112" r="17" fill="#fff"/><circle cx="124" cy="112" r="17" fill="#fff"/><circle cx="78" cy="113" r="8" fill="#5a3a1c"/><circle cx="126" cy="113" r="8" fill="#5a3a1c"/><circle cx="79" cy="114" r="3.6" fill="#000"/><circle cx="127" cy="114" r="3.6" fill="#000"/><path d="M78 160q22 22 44 0" fill="#fff" stroke="#222" stroke-width="4" stroke-linejoin="round"/><ellipse cx="30" cy="178" rx="13" ry="30" fill="#f7d02c" transform="rotate(14 30 178)"/><ellipse cx="170" cy="178" rx="13" ry="30" fill="#f7d02c" transform="rotate(-14 170 178)"/><ellipse cx="80" cy="278" rx="22" ry="12" fill="#222"/><ellipse cx="120" cy="278" rx="22" ry="12" fill="#222"/></svg>
+<div id="welcome">Welcome!</div>
+<header>
+  <button class="ib" id="exit" aria-label="Leave website">&larr;</button>
+  <span>Happy Birthday &hearts;</span>
+  <button class="ib" id="burger" aria-label="Open menu"><i></i><i></i><i></i></button>
+</header>
+<svg id="minion" viewBox="0 0 30 52" aria-hidden="true"><path d="M15 0v8" stroke="#fff" stroke-width="1.5"/><rect x="5" y="8" width="20" height="38" rx="10" fill="#f7d02c"/><path d="M5 30h20v8a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8z" fill="#2b5fb8"/><path d="M5 19h20" stroke="#222" stroke-width="3"/><circle cx="15" cy="19" r="6" fill="#ddd" stroke="#777" stroke-width="2"/><circle cx="15" cy="19" r="2.6" fill="#4a2f1a"/><path d="M11 33q4 3 8 0" stroke="#222" fill="none" stroke-width="1.3"/></svg>
+
+<main>
+<section id="home" class="view on"><div><h1>Happy birthday<br>Gabriel Chidindu Jevizu,</h1><p>we wish you so many beautiful<br>and prosperous year ahead.</p></div></section>
+<section id="msgs" class="view"><h2 class="t">Birthday Messages</h2><div id="mlist"></div></section>
+<section id="mems" class="view"><h2 class="t">Memories</h2><div id="grid"></div></section>
+<section id="viewer" class="view"><div id="vtop"><button class="ib" id="vback" aria-label="Back">&larr;</button><div><strong id="vname"></strong><small id="vsub"></small></div></div><div id="vbody"></div><div id="nav"><button id="prev" aria-label="Previous">&lsaquo;</button><button id="next" aria-label="Next">&rsaquo;</button></div></section>
+</main>
+<button class="fab" id="fab" aria-label="Add">+</button>
+<div id="scrim"></div>
+<nav id="drawer"><button class="hot" data-go="msgs">Birthday Messages</button><button data-go="mems">Memories</button></nav>
+<div id="modal"></div>
+<div id="bye"><div><h2>Thank you for celebrating Gabriel &hearts;</h2><p class="sub">You can now close this tab.</p><button class="pri" id="stay">Back to the birthday page</button></div></div>
+
+<script>
+document.body.className='w';document.body.dataset.v='home';
+const PHOTO='https://i.ibb.co/5XPMfz22/08-CE256-C-EED2-467-E-932-A-71-C405-EBE9-AF.png';
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);
+
+// Initialize Supabase Client
+const SUPABASE_URL = 'https://aloqxhimmpgjqprxwjiq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0X3hwB0rgdpTnBr9s_kgpg_OVnzxnhx';
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+// Pre-loaded memories from Catbox and ImgBB links
+const PRELOADED_MEMORIES = [
+  { name: 'Gabriel Memory', type: 'video', url: 'https://files.catbox.moe/l2z43o.mov', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'video', url: 'https://files.catbox.moe/qufxsb.mov', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://files.catbox.moe/uhecz9.jpeg', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://files.catbox.moe/uv5t4r.jpeg', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'video', url: 'https://files.catbox.moe/nizvyl.mov', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'video', url: 'https://files.catbox.moe/4rmruj.mov', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'video', url: 'https://files.catbox.moe/cgab60.mov', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'video', url: 'https://files.catbox.moe/lqcczv.mov', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://files.catbox.moe/6qcosy.jpeg', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'video', url: 'https://files.catbox.moe/do1z01.mov', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://files.catbox.moe/yyggyp.jpeg', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://files.catbox.moe/f4hwxo.jpeg', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://i.ibb.co/6c7fwK1R/image.jpg', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://i.ibb.co/xtLLmpNx/image.jpg', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://i.ibb.co/n8mtvs1r/image.jpg', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://i.ibb.co/99JrsQPN/image.jpg', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://i.ibb.co/j9hGbY7n/image.jpg', ts: Date.now() },
+  { name: 'Gabriel Memory', type: 'image', url: 'https://i.ibb.co/PpnRDWh/image.jpg', ts: Date.now() }
+];
+
+const Store={
+  async all(c){
+    if(!supabaseClient) return [];
+    const { data, error } = await supabaseClient.from(c).select('*').order('ts', { ascending: true });
+    if(error){ console.error('Error fetching '+c, error); return []; }
+    return data || [];
+  },
+  async add(c,i){
+    if(!supabaseClient) throw new Error("Supabase client uninitialized");
+    let fileUrl = i.url || '';
+    
+    if(i.blob){
+      const fileExt = i.blob.name ? i.blob.name.split('.').pop() : (i.type === 'video' ? 'mp4' : 'jpg');
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+      const { data: uploadData, error: uploadError } = await supabaseClient.storage.from('media').upload(fileName, i.blob);
+      
+      if(uploadError){
+        alert('Storage upload failed: ' + uploadError.message);
+        throw uploadError;
+      }
+      
+      const { data: publicURLData } = supabaseClient.storage.from('media').getPublicUrl(fileName);
+      fileUrl = publicURLData.publicUrl;
+    }
+
+    const payload = {
+      name: i.name || '',
+      type: i.type,
+      text: i.text || '',
+      url: fileUrl,
+      ts: Date.now()
+    };
+
+    const { data, error } = await supabaseClient.from(c).insert([payload]).select();
+    if(error){
+      alert('Database insert failed: ' + error.message);
+      throw error;
+    }
+    return data[0];
+  }
+};
+
+const data={messages:[],memories:[]};
+let V={list:[],i:0,back:'msgs'};
+
+const im=new Image();im.onload=()=>{$('#bg').style.backgroundImage=`url(${PHOTO})`;document.body.classList.add('hasphoto')};im.src=PHOTO;
+setTimeout(()=>document.body.classList.remove('w'),1400);
+
+function go(v){document.body.dataset.v=v;document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id===v));drawer(0);scrollTo(0,0)}
+function drawer(o){$('#drawer').classList.toggle('on',!!o);$('#scrim').classList.toggle('on',!!o)}
+$('#burger').onclick=()=>drawer(!$('#drawer').classList.contains('on'));
+$('#scrim').onclick=()=>drawer(0);
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+$('#fab').onclick=()=>addMenu(document.body.dataset.v=='mems'?'memories':'messages');
+
+$('#exit').onclick=()=>{history.back();setTimeout(()=>{window.close();$('#bye').classList.add('on')},350)};
+$('#stay').onclick=()=>$('#bye').classList.remove('on');
+
+async function load(){
+  data.messages = await Store.all('messages').catch(()=>[]);
+  const fetchedMemories = await Store.all('memories').catch(()=>[]);
+  data.memories = [...PRELOADED_MEMORIES, ...fetchedMemories];
+  render();
+}
+
+function render(){
+  const L=[...data.messages].reverse(),sub=m=>m.type=='text'?esc(m.text.slice(0,50)):m.type=='image'?'🖼 Birthday Image':'▶ Birthday Video';
+  $('#mlist').innerHTML=L.length?L.map((m,i)=>`<button class="row" data-i="${i}"><b class="av">${esc((m.name[0]||'?').toUpperCase())}</b><span><strong>${esc(m.name)}</strong><small>${sub(m)} · Tap to open</small></span></button>`).join(''):'<p class="empty">No messages yet. Tap + to leave the first one.</p>';
+  $('#mlist').querySelectorAll('.row').forEach(b=>b.onclick=()=>view(L,+b.dataset.i,'msgs'));
+  const M=data.memories;
+  $('#grid').innerHTML=M.length?M.map((m,i)=>`<button class="tile" data-i="${i}" aria-label="Open memory">${m.type=='video'?`<video src="${m.url}#t=0.1" preload="metadata" muted playsinline></video><b>▶</b>`:`<img src="${m.url}" alt="">`}</button>`).join(''):'<p class="empty" style="grid-column:1/-1">The album is empty. Tap + to add the first memory.</p>';
+  $('#grid').querySelectorAll('.tile').forEach(b=>b.onclick=()=>view(M,+b.dataset.i,'mems'));
+}
+
+function view(list,i,back){V={list,i,back};show();go('viewer')}
+function show(){
+  const it=V.list[V.i];
+  $('#vbody').innerHTML=it.type=='text'?`<article class="card"><h2>${esc(it.name)}</h2><p>${esc(it.text)}</p></article>`:it.type=='image'?`<img src="${it.url}" alt="">`:`<video src="${it.url}" controls playsinline autoplay></video>`;
+  $('#vname').textContent=it.name||'Memory';
+  $('#vsub').textContent=new Date(it.ts).toLocaleString([], {dateStyle:'medium',timeStyle:'short'})+'  ·  '+(V.i+1)+' / '+V.list.length;
+  $('#nav').style.visibility=V.list.length>1?'visible':'hidden';
+}
+const step=d=>{V.i=(V.i+d+V.list.length)%V.list.length;show()};
+$('#prev').onclick=()=>step(-1);$('#next').onclick=()=>step(1);
+$('#vback').onclick=()=>{$('#vbody').innerHTML='';go(V.back)};
+let tx;$('#viewer').ontouchstart=e=>tx=e.touches[0].clientX;
+$('#viewer').ontouchend=e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60&&V.list.length>1)step(d<0?1:-1)};
+
+const M=$('#modal');
+function modal(h){M.innerHTML=`<div class="sheet">${h}</div>`;M.classList.add('on')}
+function closeModal(){M.classList.remove('on');setTimeout(()=>{if(!M.classList.contains('on'))M.innerHTML=''},300)}
+M.onclick=e=>{if(e.target==M||e.target.closest('[data-close]'))closeModal()};
+
+function addMenu(col){
+  const msg=col=='messages';
+  modal(`<button class="x" data-close aria-label="Close">×</button><h3>${msg?'Add to Birthday Board':'Add to Memories'}</h3><p class="sub">Choose what you want to add</p><div class="opts"><button class="opt v" data-t="video">▶<span>Video</span></button><button class="opt i" data-t="image">🖼<span>Image</span></button>${msg?'<button class="opt t" data-t="text">T<span>Text</span></button>':''}</div><button class="ghost" data-close>Cancel</button>`);
+  M.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>flow(col,b.dataset.t));
+}
+function needName(col){const n=$('#nm');if(col=='messages'&&!n.value.trim()){n.focus();n.classList.add('shake');setTimeout(()=>n.classList.remove('shake'),400);return null}return col=='messages'?n.value.trim():''}
+function flow(col,type){
+  if(type=='text')return textForm();
+  const msg=col=='messages',T=type=='video'?'Video':'Image';
+  modal(`<div class="big">${type=='video'?'▶':'🖼'}</div><h3>Add ${T}</h3><p class="sub">Select ${type} from your gallery</p>${msg?'<label>Your Name</label><input type="text" id="nm" placeholder="e.g. John" maxlength="40" autocomplete="name">':''}<button class="pri" id="pick">Choose from Gallery</button><input type="file" id="file" hidden accept="${type}/*"><button class="ghost" data-close>Cancel</button>`);
+  $('#pick').onclick=()=>{$('#file').click()};
+  $('#file').onchange=e=>{const f=e.target.files[0];if(f)preview(col,type,needName(col),f)};
+}
+function preview(col,type,name,f){
+  const u=URL.createObjectURL(f);
+  modal(`<h3>${type=='video'?'Video':'Image'} ready</h3>${type=='video'?`<video src="${u}" controls playsinline muted></video>`:`<img src="${u}" alt="">`}<div class="send"><div class="pg"><div><i id="bar"></i></div><small id="pct">Uploading... 0%</small></div><button class="go" id="go" disabled aria-label="Send">→</button></div><button class="ghost" data-close>Cancel</button>`);
+  const set=p=>{$('#bar').style.width=p+'\%';$('#pct').textContent=p<100?`Uploading... ${p|0}%`:'Ready. Tap → to send';$('#go').disabled=p<100};
+  set(100);
+  $('#go').onclick=async()=>{$('#go').disabled=true;await Store.add(col,{name,type,blob:f});done(col=='memories'?'Memory added!':(type=='video'?'Video':'Image')+' sent successfully!',col)};
+}
+function textForm(){
+  modal(`<div class="big">T</div><h3>Add Text</h3><label>Sender's Name</label><input type="text" id="nm" placeholder="e.g. John" maxlength="40"><label>Your Message</label><textarea id="tx" placeholder="Type your message here..." maxlength="1500"></textarea><button class="pri" id="sub">Send</button><button class="ghost" data-close>Cancel</button>`);
+  $('#sub').onclick=async()=>{const n=needName('messages'),t=$('#tx').value.trim();if(n===null)return;if(!t){$('#tx').focus();return}
+    $('#sub').disabled=true;await Store.add('messages',{name:n,type:'text',text:t});done('Message sent successfully!','messages')};
+}
+function done(msg,col){
+  modal(`<div class="ok">✓</div><h3>${msg}</h3><button class="pri" id="dn">Done</button>`);
+  $('#dn').onclick=async()=>{closeModal();await load();go(col=='messages'?'msgs':'mems')};
+}
+load();
+</script>
+</body>
+</html>
